@@ -2,9 +2,19 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 
+from starkware.starknet.common.syscalls import (
+    get_contract_address,
+)
+
 struct Comment: 
     member user : felt
     member content : felt
+end
+
+@contract_interface
+namespace UserContract:
+    func add_post(post_address : felt):
+    end
 end
 
 ### --- list of @storage_var (field) functions --- ###
@@ -44,7 +54,8 @@ func constructor{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
     range_check_ptr,
-}(owner_address : felt, initial_description : felt, initial_image : felt):
+}(initial_description : felt, initial_image : felt):
+    let (owner_address) = get_caller_address()
     owner.write(value=owner_address)
     description.write(value=initial_description)
     image.write(value=initial_image)
@@ -93,6 +104,15 @@ func edit_description{
     description.write(new_desc)
 end
 
+@external
+func call_add_post{syscall_ptr : felt*, range_check_ptr}(
+    user_contract_address : felt
+):
+    UserContract.like_post(
+        contract_address=user_contract_address, post_address=get_contract_address()
+    )
+    return ()
+end
 
 ### --- list of @view (getter) functions --- ###
 
