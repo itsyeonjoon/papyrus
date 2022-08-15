@@ -95,7 +95,7 @@ func call_like_post{syscall_ptr : felt*, range_check_ptr}(
     contract_address : felt
 ):
     PostContract.like_post(
-        contract_address=contract_address
+        contract_address=contract_address, username=username.read()
     )
     return ()
 end
@@ -106,7 +106,7 @@ func call_comment_post{syscall_ptr : felt*, range_check_ptr}(
     contract_address : felt, content : felt
 ):
     PostContract.comment_post(
-        contract_address=contract_address, content=content
+        contract_address=contract_address, content=content, username=username.read()
     )
     return ()
 end

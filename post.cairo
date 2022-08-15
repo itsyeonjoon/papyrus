@@ -88,37 +88,62 @@ end
 
 # calling this will allow caller to "like" the post. 
 # adds their user address to the likes_list, and increases
-# likes_count by 1. 
+# likes_count by 1. It is not designed to be called by directly, 
+# but is intended to be called within user.cairo. 
 @external 
 func like_post{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
     range_check_ptr,
-}():
-    let (user) = get_caller_address()
+}(username : felt):
+    validate_like_post(idx=0)
+
     let (next_idx) = likes_count.read()
-    likes_list.write(next_idx, user)
+    likes_list.write(next_idx, username)
     likes_count.write(next_idx + 1)
     return ()
 end
 
+func validate_like_post{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr,
+}(username : felt, idx : felt): 
+    if idx == likes_count.read():
+        return ()
+    assert likes_list.read(idx) != username
+    validate_like_post(username=username, idx=idx+1)
+
 # calling this will allow caller to "comment" the post. 
 # adds their Comment to the comment_list, and increases
-# comments_count by 1. 
+# comments_count by 1. It is not designed to be called by directly, 
+# but is intended to be called within user.cairo. 
 @external 
 func comment_post{
     syscall_ptr : felt*,
     pedersen_ptr : HashBuiltin*,
     range_check_ptr,
-}(content : felt):
-
-    let (user) = get_caller_address()
+}(content : felt, username : felt):
+    validate_comment_post(username=username, idx=0)
+    
     let (next_idx) = comments_count.read()
-    let (new_comment) = Comment(user=user, content=content)
+    let (new_comment) = Comment(user=username, content=content)
     comments_list.write(next_idx, new_comment)
     comments_count.write(next_idx + 1)
     return ()
 end
+
+func validate_comment_post{
+    syscall_ptr : felt*,
+    pedersen_ptr : HashBuiltin*,
+    range_check_ptr,
+}(username : felt, idx : felt): 
+    if idx == comments_count.read():
+        return ()
+    let (cmt) = comments_list.read(idx)
+
+    assert cmt.user != username
+    validate_like_post(username=username, idx=idx+1)
 
 # edits the description of the post
 @external 
