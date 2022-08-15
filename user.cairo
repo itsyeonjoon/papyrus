@@ -38,6 +38,10 @@ end
 func posts_count() -> (res : felt): 
 end
 
+### --- constructor for the user contract --- ###
+
+# constructor initializes a user contract, setting the owner to be the one who 
+# published the contract. 
 @constructor 
 func constructor{
     syscall_ptr : felt*,
@@ -52,6 +56,9 @@ func constructor{
     return ()
 end
 
+### --- list of @external (setter) functions --- ###
+
+# edits the bio of the account
 @external 
 func edit_bio{
     syscall_ptr : felt*,
@@ -64,6 +71,9 @@ func edit_bio{
     return ()
 end
 
+# calling this will add the post (its contract address) to the user account. 
+# can be called when a user publishes a post contract using post.cairo. 
+#       parameter: post_address : felt 
 @external 
 func add_post{
     syscall_ptr : felt*,
@@ -82,6 +92,7 @@ func add_post{
     return ()
 end
 
+# calls like_post of Post Contract. See like_post function in post.cairo.
 @external
 func call_like_post{syscall_ptr : felt*, range_check_ptr}(
     contract_address : felt
@@ -92,6 +103,7 @@ func call_like_post{syscall_ptr : felt*, range_check_ptr}(
     return ()
 end
 
+# calls comment_post of Post Contract. See comment_post function in post.cairo.
 @external
 func call_comment_post{syscall_ptr : felt*, range_check_ptr}(
     contract_address : felt, content : felt
@@ -104,6 +116,8 @@ end
 
 ### --- list of @view (getter) functions --- ###
 
+# gets username of the user. 
+#       return: res : felt
 @view
 func view_username{
     syscall_ptr : felt*,
@@ -114,6 +128,8 @@ func view_username{
     return (res=res)
 end
 
+# gets bio of the user. 
+#       return: res : felt
 @view
 func view_bio{
     syscall_ptr : felt*,
@@ -124,6 +140,8 @@ func view_bio{
     return (res=res)
 end
 
+# gets posts of the user. 
+#       return: res : felt*
 @view 
 func view_posts{
     syscall_ptr : felt*,
@@ -134,6 +152,8 @@ func view_posts{
     return (res=res)
 end
 
+# gets number of posts of the user. 
+#       return: res : felt
 @view 
 func view_posts_count{
     syscall_ptr : felt*,
