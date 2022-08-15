@@ -30,7 +30,7 @@ end
 
 # list of posts of the account
 @storage_var
-func posts() -> (res : felt*): 
+func posts(idx : felt) -> (res : felt): 
 end
 
 # number of posts of the account
@@ -83,11 +83,8 @@ func add_post{
     let (caller_address) = get_caller_address()
     assert caller_address == owner.read()
 
-    let (res) = posts.read()
-    let (num) = posts_count.read()
-
-    res[num] = post_address
-    posts.write(res)
+    let (next_idx) = posts_count.read()
+    posts.write(next_idx, post_address)
     posts_count.write(num + 1)
     return ()
 end

@@ -39,9 +39,12 @@ end
 func image() -> (res : felt): 
 end
 
-# list of users who liked the post 
+# stores users who liked the post. We use map here 
+# for easier implementation than array
+#     parameter (idx : felt) acts as an index in arrays in other programming languages
+#     returns (res : felt) that returns associated user who liked the post. 
 @storage_var 
-func likes_list() -> (res : felt): 
+func likes_list(idx : felt) -> (res : felt): 
 end
 
 # number of people who liked the post 
@@ -49,9 +52,12 @@ end
 func likes_count() -> (res : felt): 
 end
 
-# list of Comments in the post 
+# stores users who commented the post. We use map here 
+# for easier implementation than array
+#     parameter (idx : felt) acts as an index in arrays in other programming languages
+#     returns associated (res : Comment) that returns the Comment struct. 
 @storage_var 
-func comments_list() -> (res : Comment*): 
+func comments_list(idx : felt) -> (res : Comment): 
 end
 
 # number of people who commented the post 
@@ -90,8 +96,9 @@ func like_post{
     range_check_ptr,
 }():
     let (user) = get_caller_address()
-    likes_list + likes_count.read() = user
-    likes_count.write(likes_count.read() + 1)
+    let (next_idx) = likes_count.read()
+    likes_list.write(next_idx, user)
+    likes_count.write(next_idx + 1)
     return ()
 end
 
@@ -104,13 +111,13 @@ func comment_post{
     pedersen_ptr : HashBuiltin*,
     range_check_ptr,
 }(content : felt):
+
     let (user) = get_caller_address()
+    let (next_idx) = comments_count.read()
     let (new_comment) = Comment(user=user, content=content)
-    comments_list + Comment.SIZE * comments_count.read() = new_comment
-    comments_count.write(comments_count.read() + 1)
+    comments_list.write(next_idx, new_comment)
+    comments_count.write(next_idx + 1)
     return ()
-    # increase comment_count by 1
-    # append a new comment struct to comments array 
 end
 
 # edits the description of the post
